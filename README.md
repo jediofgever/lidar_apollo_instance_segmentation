@@ -10,8 +10,14 @@ The credit for this package goes to Apollo and Autoware authors. This is a de-au
 To be able to build, you will still need `vox_nav_msgs` package, 
 
 CUDA Ver. 11.7
+
 Nvidia Driver 530.30.02
+
 TensorRT 8.4.1.5 
+
+[cuda_utils](https://github.com/tier4/cuda_utils)
+
+[tensorrt_common](https://github.com/tier4/tensorrt_common)
 
 Build Command; 
 
