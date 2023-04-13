@@ -22,6 +22,10 @@ namespace lidar_apollo_instance_segmentation
         node->create_publisher<sensor_msgs::msg::PointCloud2>("debug/instance_pointcloud", 1);
   }
 
+  Debugger::~Debugger()
+  {
+  }
+
   void Debugger::publishColoredPointCloud(
       const vox_nav_msgs::msg::ObjectArray &input)
   {
@@ -103,4 +107,5 @@ namespace lidar_apollo_instance_segmentation
     output_msg.header = input.header;
     instance_pointcloud_pub_->publish(output_msg);
   }
+
 } // namespace lidar_apollo_instance_segmentation

@@ -302,19 +302,18 @@ namespace lidar_apollo_instance_segmentation
 
     sensor_msgs::msg::PointCloud2 ros_pc;
     pcl::toROSMsg(cluster, ros_pc);
+
     resulting_object.cluster = ros_pc;
     resulting_object.cluster.header = in_header;
     resulting_object.header = in_header;
 
-    // position
-    const float height = max_point.z - min_point.z;
-    const float length = max_point.x - min_point.x;
-    const float width = max_point.y - min_point.y;
+    // use PointXYZ instead of PointXYZI
+    pcl::PointCloud<pcl::PointXYZ> cluster_xyz;
+    pcl::copyPointCloud(cluster, cluster_xyz);
 
-    resulting_object.pose.position.x = min_point.x + length / 2;
-    resulting_object.pose.position.y = min_point.y + width / 2;
-    resulting_object.pose.position.z = min_point.z + height / 2;
-    resulting_object.pose.orientation = getQuaternionFromRPY(0.0, 0.0, in_obstacle.heading);
+    // Fit the oriented bounding box to the cluster
+    // Pose and size of the bounding box are stored in the resulting_object
+    fitBoxtoPointCloud(std::make_shared<pcl::PointCloud<pcl::PointXYZ>>(cluster_xyz), resulting_object);
 
     return resulting_object;
   }
@@ -359,4 +358,46 @@ namespace lidar_apollo_instance_segmentation
     }
     objects.header = in_header;
   }
+
+  void Cluster2D::fitBoxtoPointCloud(
+      const pcl::PointCloud<pcl::PointXYZ>::Ptr input,
+      vox_nav_msgs::msg::Object &output)
+  {
+    // Compute principal directions
+    Eigen::Vector4f pcaCentroid;
+    pcl::compute3DCentroid(*input, pcaCentroid);
+    Eigen::Matrix3f covariance;
+    pcl::computeCovarianceMatrixNormalized(*input, pcaCentroid, covariance);
+    Eigen::SelfAdjointEigenSolver<Eigen::Matrix3f> eigen_solver(covariance, Eigen::ComputeEigenvectors);
+    Eigen::Matrix3f eigenVectorsPCA = eigen_solver.eigenvectors();
+    eigenVectorsPCA.col(2) = eigenVectorsPCA.col(0).cross(eigenVectorsPCA.col(1));
+
+    Eigen::Matrix4f projectionTransform(Eigen::Matrix4f::Identity());
+    projectionTransform.block<3, 3>(0, 0) = eigenVectorsPCA.transpose();
+    projectionTransform.block<3, 1>(0, 3) = -1.f * (projectionTransform.block<3, 3>(0, 0) * pcaCentroid.head<3>());
+    pcl::PointCloud<pcl::PointXYZ>::Ptr cloudPointsProjected(new pcl::PointCloud<pcl::PointXYZ>);
+    pcl::transformPointCloud(*input, *cloudPointsProjected, projectionTransform);
+    // Get the minimum and maximum points of the transformed cloud.
+    pcl::PointXYZ minPoint, maxPoint;
+    pcl::getMinMax3D(*cloudPointsProjected, minPoint, maxPoint);
+    const Eigen::Vector3f meanDiagonal = 0.5f * (maxPoint.getVector3fMap() + minPoint.getVector3fMap());
+
+    // Final transform
+    const Eigen::Quaternionf bboxQuaternion(eigenVectorsPCA);
+    const Eigen::Vector3f bboxTransform = eigenVectorsPCA * meanDiagonal + pcaCentroid.head<3>();
+
+    // return the bounding box with ros message
+    output.pose.position.x = bboxTransform.x();
+    output.pose.position.y = bboxTransform.y();
+    output.pose.position.z = bboxTransform.z();
+    output.pose.orientation.x = bboxQuaternion.x();
+    output.pose.orientation.y = bboxQuaternion.y();
+    output.pose.orientation.z = bboxQuaternion.z();
+    output.pose.orientation.w = bboxQuaternion.w();
+    output.shape.dimensions.push_back(maxPoint.x - minPoint.x);
+    output.shape.dimensions.push_back(maxPoint.y - minPoint.y);
+    output.shape.dimensions.push_back(maxPoint.z - minPoint.z);
+    output.shape.type = shape_msgs::msg::SolidPrimitive::BOX;
+  }
+
 } // namespace lidar_apollo_instance_segmentation

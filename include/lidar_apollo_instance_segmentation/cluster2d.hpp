@@ -31,7 +31,12 @@
 #include <pcl/point_cloud.h>
 #include <pcl/point_types.h>
 #include <pcl/common/common.h>
+#include <pcl/common/common.h>
+#include <pcl/common/centroid.h>
+#include <pcl/common/transforms.h>
+#include <pcl_conversions/pcl_conversions.h>
 
+#include <Eigen/Eigen>
 #include <memory>
 #include <vector>
 
@@ -85,6 +90,10 @@ namespace lidar_apollo_instance_segmentation
 
     vox_nav_msgs::msg::Object obstacleToObject(
         const Obstacle &in_obstacle, const std_msgs::msg::Header &in_header);
+
+    void fitBoxtoPointCloud(
+        const pcl::PointCloud<pcl::PointXYZ>::Ptr input,
+        vox_nav_msgs::msg::Object &output);
 
   private:
     int rows_;

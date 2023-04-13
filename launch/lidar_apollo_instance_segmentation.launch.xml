@@ -2,6 +2,7 @@
   <arg name="input/pointcloud" default="/dobbie/sensing/lidar/top/pointcloud_raw"/>
   <arg name="model" default="model_64"/>
   <arg name="output/objects" default="labeled_clusters"/>
+  <arg name="output/labeled_detections" default="pcdet/lidar/detections"/>
 
   <arg if="$(eval &quot;'$(var model)'=='model_16'&quot;)" name="base_name" default="vlp-16"/>
   <arg if="$(eval &quot;'$(var model)'=='model_64'&quot;)" name="base_name" default="hdl-64"/>
@@ -11,7 +12,7 @@
   <arg name="param_file" default="$(find-pkg-share lidar_apollo_instance_segmentation)/config/$(var base_name).param.yaml"/>
 
   <arg name="target_frame" default="base_link"/>
-  <arg name="z_offset" default="-2.0"/>
+  <arg name="z_offset" default="0.0"/>
 
   <arg name="precision" default="fp32"/>
   <arg name="use_sim_time" default="True"/>
@@ -19,6 +20,7 @@
   <node pkg="lidar_apollo_instance_segmentation" exec="lidar_apollo_instance_segmentation_node" name="lidar_apollo_instance_segmentation" output="screen">
     <remap from="input/pointcloud" to="$(var input/pointcloud)"/>
     <remap from="output/labeled_clusters" to="$(var output/objects)"/>
+    <remap from="output/labeled_detections" to="$(var output/labeled_detections)"/>
     <param name="onnx_file" value="$(var trained_onnx_file)"/>
     <param name="z_offset" value="$(var z_offset)"/>
     <param name="precision" value="$(var precision)"/>

@@ -28,16 +28,16 @@ namespace lidar_apollo_instance_segmentation
 {
   class Debugger
   {
-  public:
-    Debugger(rclcpp::Node *node);
+  private:
+    rclcpp::Publisher<sensor_msgs::msg::PointCloud2>::SharedPtr instance_pointcloud_pub_;
 
-    ~Debugger(){};
+  public:
+    explicit Debugger(rclcpp::Node *node);
+
+    ~Debugger();
 
     void publishColoredPointCloud(
         const vox_nav_msgs::msg::ObjectArray &input);
-
-  private:
-    rclcpp::Publisher<sensor_msgs::msg::PointCloud2>::SharedPtr instance_pointcloud_pub_;
   };
 
 } // namespace lidar_apollo_instance_segmentation

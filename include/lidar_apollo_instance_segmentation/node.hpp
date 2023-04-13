@@ -19,10 +19,9 @@
 
 #include <rclcpp/rclcpp.hpp>
 
-// #include <tier4_autoware_utils/ros/debug_publisher.hpp>
-// #include <tier4_autoware_utils/system/stop_watch.hpp>
-
 #include <sensor_msgs/msg/point_cloud2.hpp>
+#include <vision_msgs/msg/detection3_d_array.hpp>
+#include <vision_msgs/msg/detection3_d.hpp>
 
 #include <memory>
 
@@ -44,8 +43,12 @@ namespace lidar_apollo_instance_segmentation
         rclcpp::Subscription<sensor_msgs::msg::PointCloud2>::SharedPtr pointcloud_sub_;
         rclcpp::Publisher<vox_nav_msgs::msg::ObjectArray>::SharedPtr dynamic_objects_pub_;
         std::shared_ptr<LidarInstanceSegmentationInterface> detector_ptr_;
+        rclcpp::Publisher<vision_msgs::msg::Detection3DArray>::SharedPtr vision_detection_pub_;
         std::shared_ptr<Debugger> debugger_ptr_;
         void pointCloudCallback(const sensor_msgs::msg::PointCloud2::ConstSharedPtr msg);
+
+        void publisVisionMsg4DynamicObj(
+            const vox_nav_msgs::msg::ObjectArray &input);
 
     public:
         explicit LidarInstanceSegmentationNode(const rclcpp::NodeOptions &node_options);

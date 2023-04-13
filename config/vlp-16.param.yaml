@@ -4,5 +4,5 @@
       range: 70
       width: 672
       height: 672
-      use_intensity_feature: true
+      use_intensity_feature: false
       use_constant_feature: false

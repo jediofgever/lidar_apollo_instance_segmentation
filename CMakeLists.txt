@@ -15,6 +15,7 @@ find_package(pcl_ros REQUIRED)
 find_package(pcl_conversions REQUIRED)
 find_package(vox_nav_msgs REQUIRED)
 find_package(tf2_eigen REQUIRED)
+find_package(vision_msgs REQUIRED)
 
 set(dependencies
 cuda_utils
@@ -25,6 +26,7 @@ pcl_ros
 pcl_conversions
 vox_nav_msgs
 tf2_eigen
+vision_msgs
 )
 
 include_directories(include)
