@@ -31,10 +31,10 @@ namespace lidar_apollo_instance_segmentation
         std::bind(&LidarInstanceSegmentationNode::pointCloudCallback, this, _1));
 
     dynamic_objects_pub_ =
-        this->create_publisher<vox_nav_msgs::msg::ObjectArray>("output/labeled_clusters", rclcpp::QoS{1});
+        this->create_publisher<vox_nav_msgs::msg::ObjectArray>("output/detections", rclcpp::QoS{1});
 
     vision_detection_pub_ =
-        this->create_publisher<vision_msgs::msg::Detection3DArray>("output/labeled_detections", rclcpp::QoS{1});
+        this->create_publisher<vision_msgs::msg::Detection3DArray>("output/detections_vision", rclcpp::QoS{1});
 
     if (get_parameter("use_sim_time").as_bool())
     {
